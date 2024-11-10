@@ -17,50 +17,84 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { auth } from "./firebase";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+interface HealthDetails {
+    bloodpressure: string;
+    allergy: string;
+    smoking: string;
+    alcohol: string;
+}
 
 export default function HealthInformation({
     onSubmit,
+    initialData,
 }: {
     onSubmit: () => void;
+    initialData?: HealthDetails;
 }) {
-    const [bloodpressure, setBloodPressure] = useState("");
-    const [allergy, setAllergy] = useState("");
-    const [smoking, setSmoking] = useState("");
-    const [alcohol, setAlcohol] = useState("");
+    const [bloodpressure, setBloodPressure] = useState<string>(
+        initialData?.bloodpressure || ""
+    );
+    const [allergy, setAllergy] = useState<string>(initialData?.allergy || "");
+    const [smoking, setSmoking] = useState<string>(initialData?.smoking || "");
+    const [alcohol, setAlcohol] = useState<string>(initialData?.alcohol || "");
+
+    // check if fields are empty
+    const [formFilled, setFormFilled] = useState(false);
+
+    // update if data changes.
+    useEffect(() => {
+        if (initialData) {
+            setBloodPressure(initialData.bloodpressure);
+            setAllergy(initialData.allergy);
+            setSmoking(initialData.smoking);
+            setAlcohol(initialData.alcohol);
+        }
+    }, [initialData]);
+    const userId = auth.currentUser?.uid;
+
+    const healthData = {
+        userId,
+        bloodpressure,
+        allergy,
+        smoking,
+        alcohol,
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const userId = auth.currentUser?.uid;
+        // check if all fields are fileld
+        if (bloodpressure && allergy && smoking && alcohol) {
+            setFormFilled(true);
+        } else {
+            setFormFilled(false);
+            return;
+        }
 
-        const userData = {
-            userId,
-            bloodpressure,
-            allergy,
-            smoking,
-            alcohol,
-        };
+        if (formFilled) {
+            try {
+                const response = await fetch(
+                    "https://health-track-app-cm4e.onrender.com/health",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(healthData),
+                    }
+                );
+                console.log(JSON.stringify(healthData));
 
-        try {
-            // Send user data to your backend
-            const response = await fetch("api/basic", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(userData),
-            });
-            console.log(JSON.stringify(userData));
+                if (!response.ok) {
+                    throw new Error("Failed to submit data");
+                }
 
-            if (!response.ok) {
-                throw new Error("Failed to submit data");
+                onSubmit();
+            } catch (error) {
+                console.error("Error submitting data:", error);
             }
-
-            // Call the onSubmit callback to trigger the refetch of patient data
-            onSubmit();
-        } catch (error) {
-            console.error("Error submitting data:", error);
         }
     };
     return (

@@ -6,11 +6,11 @@ import {
     DropdownMenuContent,
     DropdownMenuLabel,
     DropdownMenuTrigger,
-    DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+// import { Link } from "react-router-dom";
 
 const getFirstName = (displayName: string | null): string => {
-    if (!displayName) return ""; // Handle null case
+    if (!displayName) return "User"; // Handle null case
     return displayName.split(" ")[0];
 };
 
@@ -32,10 +32,10 @@ const Navbar: React.FC<NavbarProps> = ({ userName, handleLogout }) => {
                     <Settings className="cursor-pointer" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="m-2 w-44 shadow-xl bg-white text-black rounded-2xl p-2">
-                    <DropdownMenuLabel className="cursor-pointer rounded-2xl hover:bg-black/10">
+                    {/* <DropdownMenuLabel className="cursor-pointer rounded-2xl hover:bg-black/10">
                         Update Details
                     </DropdownMenuLabel>
-                    <DropdownMenuSeparator className="opacity-40" />
+                    <DropdownMenuSeparator className="opacity-40" /> */}
                     <DropdownMenuLabel
                         onClick={handleLogout}
                         className="text-red-500 cursor-pointer rounded-2xl hover:bg-red-500/10"

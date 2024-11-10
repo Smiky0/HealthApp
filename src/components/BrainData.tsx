@@ -16,10 +16,14 @@ export default function BrainData() {
     const [base64, setBase64] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    const [responseData, setResponseData] = useState<any>(null);
+    const [jsondata, setJsondata] = useState<any>(null);
+
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = event.target.files?.[0];
         if (selectedFile) {
             setFile(selectedFile);
+            console.log(file);
             convertFileToBase64(selectedFile);
         }
     };
@@ -28,19 +32,26 @@ export default function BrainData() {
         const reader = new FileReader();
         reader.onloadend = () => {
             const base64String = reader.result as string;
-            setBase64(base64String);
+            setBase64(base64String.split("base64,")[1]);
         };
         reader.readAsDataURL(file);
     };
 
-    const handlePredict = () => {
+    const handlePredict = async () => {
         if (base64) {
-            console.log("Base64 encoded image:", base64);
-            fetch("/api/upload", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ img: base64 }),
-            });
+            const response = await fetch(
+                "https://health-track-app-cm4e.onrender.com/model/brain",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ img: base64 }),
+                }
+            );
+            // console.log(base64);
+            const jsonresponse = await response.json();
+            setResponseData(true);
+            // console.log(jsonresponse);
+            setJsondata(jsonresponse["brain"]);
         } else {
             console.log("No file selected or processing failed.");
         }
@@ -72,6 +83,13 @@ export default function BrainData() {
                             type="file"
                         />
                     </div>
+                    {responseData && (
+                        <div className="flex justify-center items-center mt-4 p-4 text-lg rounded-2xl bg-slate-300">
+                            <p className="font-medium tracking-wide">
+                                {"Chances of  " + jsondata}
+                            </p>
+                        </div>
+                    )}
                 </CardContent>
 
                 <CardFooter className="flex justify-between">

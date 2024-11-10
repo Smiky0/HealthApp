@@ -14,10 +14,15 @@ import {
     signOut,
 } from "firebase/auth";
 import { MailOpen } from "lucide-react";
+// import UpdateData from "./components/UpdateData";
 
 function App() {
-    const [user, setUser] = useState<User | null>(null); // State to hold the authenticated user
+    const [user, setUser] = useState<User | null>(null);
     const [buttonText, setButtonText] = useState("Predict with AI ✨");
+
+    // Loading states for PatientDetails and PatientReport
+    const [detailsLoaded, setDetailsLoaded] = useState(false);
+    const [reportLoaded, setReportLoaded] = useState(false);
 
     // Check if a user is logged in and update `user` state
     useEffect(() => {
@@ -46,6 +51,7 @@ function App() {
         }
     };
 
+    const showPredictButton = reportLoaded && detailsLoaded;
     const handleButtonClick = () => {
         setButtonText(
             buttonText === "Predict with AI ✨"
@@ -53,13 +59,16 @@ function App() {
                 : "Predict with AI ✨"
         );
     };
+    // const handleSubmit = () => {
+    //     console.log("Submitted");
+    // };
 
     return (
         <Router>
             <div className="flex flex-col justify-center items-center p-8 gap-4">
-                {user ? ( // Check if the user is logged in
+                {user ? (
                     <>
-                        {/* Show user information and logout button */}
+                        {/* Show user information */}
                         <Navbar
                             userName={user.displayName}
                             handleLogout={handleLogout}
@@ -72,26 +81,36 @@ function App() {
                                 path="/"
                                 element={
                                     <>
-                                        <PatientDetails />
-                                        <PatientReport />
+                                        <PatientDetails
+                                            onLoadComplete={() =>
+                                                setDetailsLoaded(true)
+                                            }
+                                        />
+                                        <PatientReport
+                                            onLoadComplete={() =>
+                                                setReportLoaded(true)
+                                            }
+                                        />
 
-                                        {/* Conditionally render the button */}
+                                        {/* predict with ai button */}
                                         <Link
                                             to="/predict"
                                             className="fixed bottom-4 z-50"
                                         >
-                                            <Button
-                                                onClick={handleButtonClick}
-                                                className="h-10 text-md p-6 rounded-3xl "
-                                            >
-                                                {buttonText}
-                                            </Button>
+                                            {showPredictButton && (
+                                                <Button
+                                                    onClick={handleButtonClick}
+                                                    className="h-10 text-md p-6 rounded-3xl "
+                                                >
+                                                    {buttonText}
+                                                </Button>
+                                            )}
                                         </Link>
                                     </>
                                 }
                             />
 
-                            {/* Predict Page with Accordian and Toggle Button */}
+                            {/* Predict Page */}
                             <Route
                                 path="/predict"
                                 element={
@@ -102,7 +121,7 @@ function App() {
                                         </div>
                                         <Accordian />
 
-                                        {/* Button to navigate back to the report */}
+                                        {/* view report button */}
                                         <Link
                                             to="/"
                                             className="fixed bottom-4 z-50"
@@ -117,6 +136,10 @@ function App() {
                                     </>
                                 }
                             />
+                            {/* <Route
+                                path="/update_details"
+                                element={<UpdateData onSubmit={handleSubmit} />}
+                            /> */}
                         </Routes>
                     </>
                 ) : (

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -7,6 +8,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
+
 import { Label } from "@/components/ui/label";
 import {
     Select,
@@ -15,332 +17,296 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, Controller } from "react-hook-form";
 import { auth } from "./firebase";
 
-// Define validation schema with Zod
-const formSchema = z.object({
-    userid: z.string().optional(),
-    yellow_fingers: z.string(),
-    anxiety: z.string(),
-    chronic_disease: z.string(),
-    fatigue: z.string(),
-    wheezing: z.string(),
-    coughing: z.string(),
-    shortness_of_breath: z.string(),
-    swallowing_difficulty: z.string(),
-    chest_pain: z.string(),
-});
-
 export default function LungCancerData() {
-    const userId = auth.currentUser?.uid;
-    // Initialize useForm with zodResolver
-    const { control, handleSubmit, reset } = useForm<
-        z.infer<typeof formSchema>
-    >({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            userid: userId,
-            yellow_fingers: "",
-            anxiety: "",
-            chronic_disease: "",
-            fatigue: "",
-            wheezing: "",
-            coughing: "",
-            shortness_of_breath: "",
-            swallowing_difficulty: "",
-            chest_pain: "",
-        },
-    });
+    const [yellowFingers, setYellowFingers] = useState<string>("");
+    const [anxiety, setAnxiety] = useState<string>("");
+    const [chronicDisease, setChronicDisease] = useState<string>("");
+    const [fatigue, setFatigue] = useState<string>("");
+    const [wheezing, setWheezing] = useState<string>("");
+    const [coughing, setCoughing] = useState<string>("");
+    const [shortnessOfBreath, setShortnessOfBreath] = useState<string>("");
+    const [swallowingDifficulty, setSwallowingDifficulty] =
+        useState<string>("");
+    const [chestPain, setChestPain] = useState<string>("");
 
-    // Handle form submission
-    const onSubmit = (data: any) => {
-        console.log("Data: ", data);
-        // Send data to backend
+    const [responseData, setResponseData] = useState<any>(null);
+    const [jsondata, setJsondata] = useState<any>(null);
+
+    // Track form validation state
+    const [formFilled, setFormFilled] = useState(false);
+
+    const userId = auth.currentUser?.uid;
+
+    const userData = {
+        userid: userId,
+        yellow_fingers: yellowFingers,
+        anxiety: anxiety,
+        chronic_disease: chronicDisease,
+        fatigue: fatigue,
+        wheezing: wheezing,
+        coughing: coughing,
+        shortness_of_breath: shortnessOfBreath,
+        swallowing_difficulty: swallowingDifficulty,
+        chest_pain: chestPain,
     };
 
-    // Handle form reset
-    const resetForm = () => {
-        reset();
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        // Check if all fields are filled
+        if (
+            yellowFingers &&
+            anxiety &&
+            chronicDisease &&
+            fatigue &&
+            wheezing &&
+            coughing &&
+            shortnessOfBreath &&
+            swallowingDifficulty &&
+            chestPain
+        ) {
+            setFormFilled(true);
+        } else {
+            setFormFilled(false);
+            return;
+        }
+
+        if (formFilled) {
+            console.log(userData);
+            try {
+                const response = await fetch(
+                    "https://health-track-app-cm4e.onrender.com/model/lung",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(userData),
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error("Failed to submit data");
+                }
+
+                // Handle successful form submission
+                console.log("Data submitted successfully!");
+
+                const jsonresponse = await response.json();
+                setResponseData(true);
+                if (jsonresponse["lung"] === "Yes") {
+                    setJsondata("You need to get checked");
+                } else if (jsonresponse["lung"] === "No") {
+                    setJsondata("You seem healthy");
+                }
+                console.log(jsonresponse);
+            } catch (error) {
+                console.error("Error submitting data:", error);
+            }
+        }
     };
 
     return (
-        <div className="flex flex-col w-full sm:w-3/4 gap-3 bg-white rounded-3xl">
+        <div className="flex flex-col w-full sm:w-1/2 gap-3 bg-white rounded-3xl">
             <Card className="w-full">
                 <CardHeader>
                     <CardTitle>Lung Cancer Prediction</CardTitle>
-                    <CardDescription className="text-black/70">
+                    <CardDescription>
                         Predicted by our new AI model✨✨
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    {/* Wrap the entire form inside the form element */}
-                    <form onSubmit={handleSubmit(onSubmit)}>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 w-full items-center gap-6">
-                            {/* Chest Pain Type Select */}
+                    <form onSubmit={handleSubmit}>
+                        <div className="grid w-full items-center gap-6">
+                            {/* Yellow Fingers Select */}
                             <div className="flex flex-col space-y-1.5">
                                 <Label htmlFor="yellow_fingers">
                                     Yellow Fingers
                                 </Label>
-                                <Controller
-                                    name="yellow_fingers"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Select
-                                            value={field.value}
-                                            onValueChange={field.onChange}
-                                        >
-                                            <SelectTrigger id="yellow_fingers">
-                                                <SelectValue placeholder="Select" />
-                                            </SelectTrigger>
-                                            <SelectContent position="popper">
-                                                <SelectItem value="1">
-                                                    Yes
-                                                </SelectItem>
-                                                <SelectItem value="0">
-                                                    No
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    )}
-                                />
+                                <Select
+                                    value={yellowFingers}
+                                    onValueChange={setYellowFingers}
+                                >
+                                    <SelectTrigger id="yellow-fingers">
+                                        <SelectValue placeholder="Select" />
+                                    </SelectTrigger>
+                                    <SelectContent position="popper">
+                                        <SelectItem value="1">Yes</SelectItem>
+                                        <SelectItem value="0">No</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
 
-                            {/* Anxiety Input */}
+                            {/* Anxiety Select */}
                             <div className="flex flex-col space-y-1.5">
                                 <Label htmlFor="anxiety">Anxiety</Label>
-                                <Controller
-                                    name="anxiety"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Select
-                                            value={field.value}
-                                            onValueChange={field.onChange}
-                                        >
-                                            <SelectTrigger id="anxiety">
-                                                <SelectValue placeholder="Select" />
-                                            </SelectTrigger>
-                                            <SelectContent position="popper">
-                                                <SelectItem value="1">
-                                                    Yes
-                                                </SelectItem>
-                                                <SelectItem value="0">
-                                                    No
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    )}
-                                />
+                                <Select
+                                    value={anxiety}
+                                    onValueChange={setAnxiety}
+                                >
+                                    <SelectTrigger id="anxiety">
+                                        <SelectValue placeholder="Select" />
+                                    </SelectTrigger>
+                                    <SelectContent position="popper">
+                                        <SelectItem value="1">Yes</SelectItem>
+                                        <SelectItem value="0">No</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
-                            {/* chronic disease Input */}
+
+                            {/* Chronic Disease Select */}
                             <div className="flex flex-col space-y-1.5">
                                 <Label htmlFor="chronic_disease">
                                     Chronic Disease
                                 </Label>
-                                <Controller
-                                    name="chronic_disease"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Select
-                                            value={field.value}
-                                            onValueChange={field.onChange}
-                                        >
-                                            <SelectTrigger id="chronic_disease">
-                                                <SelectValue placeholder="Select" />
-                                            </SelectTrigger>
-                                            <SelectContent position="popper">
-                                                <SelectItem value="1">
-                                                    Yes
-                                                </SelectItem>
-                                                <SelectItem value="0">
-                                                    No
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    )}
-                                />
+                                <Select
+                                    value={chronicDisease}
+                                    onValueChange={setChronicDisease}
+                                >
+                                    <SelectTrigger id="chronic-disease">
+                                        <SelectValue placeholder="Select" />
+                                    </SelectTrigger>
+                                    <SelectContent position="popper">
+                                        <SelectItem value="1">Yes</SelectItem>
+                                        <SelectItem value="0">No</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
-                            {/* fatigue Input */}
+
+                            {/* Fatigue Input */}
                             <div className="flex flex-col space-y-1.5">
                                 <Label htmlFor="fatigue">Fatigue</Label>
-                                <Controller
-                                    name="fatigue"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Select
-                                            value={field.value}
-                                            onValueChange={field.onChange}
-                                        >
-                                            <SelectTrigger id="fatigue">
-                                                <SelectValue placeholder="Select" />
-                                            </SelectTrigger>
-                                            <SelectContent position="popper">
-                                                <SelectItem value="1">
-                                                    Yes
-                                                </SelectItem>
-                                                <SelectItem value="0">
-                                                    No
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    )}
-                                />
+
+                                <Select
+                                    value={fatigue}
+                                    onValueChange={setFatigue}
+                                >
+                                    <SelectTrigger id="fatigue">
+                                        <SelectValue placeholder="Select" />
+                                    </SelectTrigger>
+                                    <SelectContent position="popper">
+                                        <SelectItem value="1">Yes</SelectItem>
+                                        <SelectItem value="0">No</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
-                            {/* wheezing Input */}
+
+                            {/* Wheezing Input */}
                             <div className="flex flex-col space-y-1.5">
                                 <Label htmlFor="wheezing">Wheezing</Label>
-                                <Controller
-                                    name="wheezing"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Select
-                                            value={field.value}
-                                            onValueChange={field.onChange}
-                                        >
-                                            <SelectTrigger id="wheezing">
-                                                <SelectValue placeholder="Select" />
-                                            </SelectTrigger>
-                                            <SelectContent position="popper">
-                                                <SelectItem value="1">
-                                                    Yes
-                                                </SelectItem>
-                                                <SelectItem value="0">
-                                                    No
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    )}
-                                />
+
+                                <Select
+                                    value={wheezing}
+                                    onValueChange={setWheezing}
+                                >
+                                    <SelectTrigger id="wheezing">
+                                        <SelectValue placeholder="Select" />
+                                    </SelectTrigger>
+                                    <SelectContent position="popper">
+                                        <SelectItem value="1">Yes</SelectItem>
+                                        <SelectItem value="0">No</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
-                            {/* coughing Input */}
+
+                            {/* Coughing Input */}
                             <div className="flex flex-col space-y-1.5">
                                 <Label htmlFor="coughing">Coughing</Label>
-                                <Controller
-                                    name="coughing"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Select
-                                            value={field.value}
-                                            onValueChange={field.onChange}
-                                        >
-                                            <SelectTrigger id="coughing">
-                                                <SelectValue placeholder="Select" />
-                                            </SelectTrigger>
-                                            <SelectContent position="popper">
-                                                <SelectItem value="1">
-                                                    Yes
-                                                </SelectItem>
-                                                <SelectItem value="0">
-                                                    No
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    )}
-                                />
+
+                                <Select
+                                    value={coughing}
+                                    onValueChange={setCoughing}
+                                >
+                                    <SelectTrigger id="coughing">
+                                        <SelectValue placeholder="Select" />
+                                    </SelectTrigger>
+                                    <SelectContent position="popper">
+                                        <SelectItem value="1">Yes</SelectItem>
+                                        <SelectItem value="0">No</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
-                            {/* shortness_of_breath Input */}
+
+                            {/* Shortness of Breath Input */}
                             <div className="flex flex-col space-y-1.5">
                                 <Label htmlFor="shortness_of_breath">
                                     Shortness Of Breath
                                 </Label>
-                                <Controller
-                                    name="shortness_of_breath"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Select
-                                            value={field.value}
-                                            onValueChange={field.onChange}
-                                        >
-                                            <SelectTrigger id="shortness_of_breath">
-                                                <SelectValue placeholder="Select" />
-                                            </SelectTrigger>
-                                            <SelectContent position="popper">
-                                                <SelectItem value="1">
-                                                    Yes
-                                                </SelectItem>
-                                                <SelectItem value="0">
-                                                    No
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    )}
-                                />
+
+                                <Select
+                                    value={shortnessOfBreath}
+                                    onValueChange={setShortnessOfBreath}
+                                >
+                                    <SelectTrigger id="shortness_of_breath">
+                                        <SelectValue placeholder="Select" />
+                                    </SelectTrigger>
+                                    <SelectContent position="popper">
+                                        <SelectItem value="1">Yes</SelectItem>
+                                        <SelectItem value="0">No</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
-                            {/* swallowing_difficulty Input */}
+
+                            {/* Swallowing Difficulty Input */}
                             <div className="flex flex-col space-y-1.5">
                                 <Label htmlFor="swallowing_difficulty">
                                     Swallowing Difficulty
                                 </Label>
-                                <Controller
-                                    name="swallowing_difficulty"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Select
-                                            value={field.value}
-                                            onValueChange={field.onChange}
-                                        >
-                                            <SelectTrigger id="swallowing_difficulty">
-                                                <SelectValue placeholder="Select" />
-                                            </SelectTrigger>
-                                            <SelectContent position="popper">
-                                                <SelectItem value="1">
-                                                    Yes
-                                                </SelectItem>
-                                                <SelectItem value="0">
-                                                    No
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    )}
-                                />
+
+                                <Select
+                                    value={swallowingDifficulty}
+                                    onValueChange={setSwallowingDifficulty}
+                                >
+                                    <SelectTrigger id="swallowing_difficulty">
+                                        <SelectValue placeholder="Select" />
+                                    </SelectTrigger>
+                                    <SelectContent position="popper">
+                                        <SelectItem value="1">Yes</SelectItem>
+                                        <SelectItem value="0">No</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
-                            {/* chest_pain Input */}
+
+                            {/* Chest Pain Input */}
                             <div className="flex flex-col space-y-1.5">
                                 <Label htmlFor="chest_pain">Chest Pain</Label>
-                                <Controller
-                                    name="chest_pain"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Select
-                                            value={field.value}
-                                            onValueChange={field.onChange}
-                                        >
-                                            <SelectTrigger id="chest_pain">
-                                                <SelectValue placeholder="Select" />
-                                            </SelectTrigger>
-                                            <SelectContent position="popper">
-                                                <SelectItem value="1">
-                                                    Yes
-                                                </SelectItem>
-                                                <SelectItem value="0">
-                                                    No
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    )}
-                                />
+
+                                <Select
+                                    value={chestPain}
+                                    onValueChange={setChestPain}
+                                >
+                                    <SelectTrigger id="chest_pain">
+                                        <SelectValue placeholder="Select" />
+                                    </SelectTrigger>
+                                    <SelectContent position="popper">
+                                        <SelectItem value="1">Yes</SelectItem>
+                                        <SelectItem value="0">No</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
                     </form>
+
+                    {/* Display response data */}
+                    {responseData && (
+                        <div className="flex justify-center items-center mt-4 p-4 text-lg rounded-2xl bg-slate-300">
+                            <p className="font-medium tracking-wide">
+                                {jsondata}
+                            </p>
+                        </div>
+                    )}
                 </CardContent>
 
-                <CardFooter className="flex justify-between">
-                    {/* Reset Button */}
+                <CardFooter className="flex flex-col justify-center">
+                    <p className="text-red-700 font-medium text-sm pb-2">
+                        *All fields must be filled.
+                    </p>
                     <Button
-                        className="bg-red-400 hover:bg-red-800"
-                        onClick={resetForm}
-                    >
-                        Reset
-                    </Button>
-
-                    {/* Predict Button */}
-                    <Button
-                        type="submit" // This ensures form submission is triggered
-                        className="bg-black text-white"
-                        variant="outline"
-                        onClick={handleSubmit(onSubmit)}
+                        type="submit"
+                        className="h-10 text-lg"
+                        onClick={handleSubmit}
                     >
                         Predict with AI
                     </Button>

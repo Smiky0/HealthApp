@@ -15,7 +15,7 @@ export default function Accordian() {
         <Accordion
             type="single"
             collapsible
-            className="w-full flex flex-col gap-6 md:w-3/4 pb-14"
+            className="w-full flex flex-col gap-6 md:w-3/4 lg:w-1/2 mb-14"
         >
             <AccordionItem
                 value="item-1"

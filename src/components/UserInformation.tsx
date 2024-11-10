@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -19,53 +19,83 @@ import {
 } from "@/components/ui/select";
 import { auth } from "./firebase";
 
+interface UserDetails {
+    name: string;
+    age: string;
+    gender: string;
+    height: string;
+    weight: string;
+}
+
 export default function UserInformation({
     onSubmit,
+    initialData,
 }: {
     onSubmit: () => void;
+    initialData?: UserDetails;
 }) {
-    const [fullName, setFullName] = useState("");
-    const [age, setAge] = useState("");
-    const [gender, setGender] = useState("");
-    const [height, setHeight] = useState("");
-    const [weight, setWeight] = useState("");
+    const [name, setName] = useState<string>(initialData?.name || "");
+    const [age, setAge] = useState<string>(initialData?.age || "");
+    const [gender, setGender] = useState<string>(initialData?.gender || "");
+    const [height, setHeight] = useState<string>(initialData?.height || "");
+    const [weight, setWeight] = useState<string>(initialData?.weight || "");
+
+    // check if fields are empty
+    const [formFilled, setFormFilled] = useState(false);
+
+    // set initial data if recieved
+    useEffect(() => {
+        if (initialData) {
+            setName(initialData.name);
+            setAge(initialData.age);
+            setGender(initialData.gender);
+            setHeight(initialData.height);
+            setWeight(initialData.weight);
+        }
+    }, [initialData]);
+    const userId = auth.currentUser?.uid;
+
+    const userData = {
+        userId,
+        name,
+        gender,
+        age,
+        height,
+        weight,
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const userId = auth.currentUser?.uid;
+        // check if all fields are fileld
+        if (name && gender && age && height && weight) {
+            setFormFilled(true);
+        } else {
+            setFormFilled(false);
+            return;
+        }
 
-        const userData = {
-            userId,
-            fullName,
-            age,
-            gender,
-            height,
-            weight,
-        };
+        if (formFilled) {
+            try {
+                const response = await fetch(
+                    "https://health-track-app-cm4e.onrender.com/basic",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(userData),
+                    }
+                );
+                // console.log(JSON.stringify(userData));
 
-        try {
-            // Send user data to your backend
-            const response = await fetch(
-                "api/basic",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(userData),
+                if (!response.ok) {
+                    throw new Error("Failed to submit data");
                 }
-            );
-            console.log(JSON.stringify(userData));
-
-            if (!response.ok) {
-                throw new Error("Failed to submit data");
+                onSubmit();
+            } catch (error) {
+                console.error("Error submitting data:", error);
             }
-
-            // Call the onSubmit callback to trigger the refetch of patient data
-            onSubmit();
-        } catch (error) {
-            console.error("Error submitting data:", error);
         }
     };
 
@@ -84,21 +114,10 @@ export default function UserInformation({
                             <div className="flex flex-col space-y-1.5">
                                 <Label htmlFor="name">Full Name</Label>
                                 <Input
-                                    value={fullName}
-                                    onChange={(e) =>
-                                        setFullName(e.target.value)
-                                    }
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
                                     id="name"
                                     placeholder="Your Full Name"
-                                />
-                            </div>
-                            <div className="flex flex-col space-y-1.5">
-                                <Label htmlFor="name">Your Age</Label>
-                                <Input
-                                    id="name"
-                                    placeholder="Present Age"
-                                    value={age}
-                                    onChange={(e) => setAge(e.target.value)}
                                 />
                             </div>
                             <div className="flex flex-col space-y-1.5">
@@ -117,6 +136,15 @@ export default function UserInformation({
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
+                            </div>
+                            <div className="flex flex-col space-y-1.5">
+                                <Label htmlFor="name">Your Age</Label>
+                                <Input
+                                    id="name"
+                                    placeholder="Present Age"
+                                    value={age}
+                                    onChange={(e) => setAge(e.target.value)}
+                                />
                             </div>
                             <div className="flex flex-col space-y-1.5">
                                 <Label htmlFor="name">Height (in cm)</Label>
@@ -139,7 +167,10 @@ export default function UserInformation({
                         </div>
                     </form>
                 </CardContent>
-                <CardFooter className="flex justify-center">
+                <CardFooter className="flex flex-col justify-center">
+                    <p className="text-red-700 font-medium text-sm pb-2">
+                        *All fields must to be filled.
+                    </p>
                     <Button
                         onClick={handleSubmit}
                         type="submit"

@@ -16,234 +16,226 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Input } from "./ui/input";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, Controller } from "react-hook-form";
+import { useState } from "react";
 import { auth } from "./firebase";
 
-// Define validation schema with Zod
-const formSchema = z.object({
-    userid: z.string().optional(),
-    chestpaintype: z.string(),
-    cholesterol: z.string(),
-    fastingbs: z.string(),
-    maxhr: z.string(),
-    exerciseangina: z.string(),
-    oldpeak: z.string(),
-    st_slope: z.string(),
-});
-
 export default function HeartData() {
-    // Initialize useForm with zodResolver
-    const userId = auth.currentUser?.uid;
-    const { control, handleSubmit, reset } = useForm({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            userid: userId,
-            chestpaintype: "",
-            cholesterol: "",
-            fastingbs: "",
-            maxhr: "",
-            exerciseangina: "",
-            oldpeak: "",
-            st_slope: "",
-        },
-    });
+    const [chestpaintype, setChestPainType] = useState("");
+    const [cholesterol, setCholesterol] = useState("");
+    const [fastingbs, setFastingbs] = useState("");
+    const [maxhr, setMaxhr] = useState("");
+    const [exerciseangina, setExerciseAngina] = useState("");
+    const [oldpeak, setOldpeak] = useState("");
+    const [st_slope, setStSlope] = useState("");
+    const [responseData, setResponseData] = useState<any>(null);
+    const [jsondata, setJsondata] = useState<any>(null);
 
-    // Handle form submission
-    const onSubmit = (data: any) => {
-        console.log("Data: ", data);
-        // Send data to backend
+    const [formFilled, setFormFilled] = useState(false);
+
+    const userid = auth.currentUser?.uid;
+
+    const userData = {
+        userid,
+        chestpaintype,
+        cholesterol,
+        fastingbs,
+        maxhr,
+        exerciseangina,
+        oldpeak,
+        st_slope: st_slope,
     };
 
-    // Handle form reset
-    const resetForm = () => {
-        reset();
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        // Check if all fields are filled
+        if (
+            chestpaintype &&
+            cholesterol &&
+            fastingbs &&
+            maxhr &&
+            exerciseangina &&
+            oldpeak &&
+            st_slope
+        ) {
+            setFormFilled(true);
+        } else {
+            setFormFilled(false);
+            return;
+        }
+        if (formFilled) {
+            try {
+                const response = await fetch(
+                    "https://health-track-app-cm4e.onrender.com/model/heartfailure",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(userData),
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error("Failed to submit data");
+                }
+                // Handle successful form submission
+                console.log("Data submitted successfully!");
+                // console.log(response.json());
+
+                const jsonresponse = await response.json();
+                setResponseData(true);
+                if (jsonresponse["heart"] === "Yes") {
+                    setJsondata("You need to get checked");
+                } else if (jsonresponse["heart"] === "No") {
+                    setJsondata("You seem healthy");
+                }
+            } catch (error) {
+                console.error("Error submitting data:", error);
+            }
+        }
     };
 
     return (
         <div className="flex flex-col w-full sm:w-3/4 gap-3 bg-white rounded-3xl">
             <Card className="w-full">
                 <CardHeader>
-                    <CardTitle>Heart Failure</CardTitle>
+                    <CardTitle>Heart Failure Prediction</CardTitle>
                     <CardDescription className="text-black/70">
-                        Predicted by our new AI model✨✨
+                        Predicted by our AI model✨✨
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    {/* Wrap the entire form inside the form element */}
-                    <form onSubmit={handleSubmit(onSubmit)}>
+                    <form onSubmit={handleSubmit}>
                         <div className="grid grid-cols-1 sm:grid-cols-2 w-full items-center gap-6">
                             {/* Chest Pain Type Select */}
                             <div className="flex flex-col space-y-1.5">
                                 <Label htmlFor="chestPainType">
                                     Chest Pain Type
                                 </Label>
-                                <Controller
-                                    name="chestpaintype"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Select
-                                            value={field.value}
-                                            onValueChange={field.onChange}
-                                        >
-                                            <SelectTrigger id="chestPainType">
-                                                <SelectValue placeholder="Select" />
-                                            </SelectTrigger>
-                                            <SelectContent position="popper">
-                                                <SelectItem value="0">
-                                                    ASY
-                                                </SelectItem>
-                                                <SelectItem value="2">
-                                                    NAP
-                                                </SelectItem>
-                                                <SelectItem value="1">
-                                                    ATA
-                                                </SelectItem>
-                                                <SelectItem value="3">
-                                                    TA
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    )}
-                                />
+                                <Select
+                                    value={chestpaintype}
+                                    onValueChange={setChestPainType}
+                                >
+                                    <SelectTrigger id="chestPainType">
+                                        <SelectValue placeholder="Select" />
+                                    </SelectTrigger>
+                                    <SelectContent position="popper">
+                                        <SelectItem value="0">ASY</SelectItem>
+                                        <SelectItem value="2">NAP</SelectItem>
+                                        <SelectItem value="1">ATA</SelectItem>
+                                        <SelectItem value="3">TA</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
 
                             {/* Cholesterol Input */}
                             <div className="flex flex-col space-y-1.5">
                                 <Label htmlFor="cholesterol">Cholesterol</Label>
-                                <Controller
-                                    name="cholesterol"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Input
-                                            placeholder="Cholesterol"
-                                            {...field}
-                                        />
-                                    )}
+                                <Input
+                                    id="cholesterol"
+                                    placeholder="Cholesterol"
+                                    value={cholesterol}
+                                    onChange={(e) =>
+                                        setCholesterol(e.target.value)
+                                    }
                                 />
                             </div>
+
                             {/* Fasting Blood Sugar Input */}
                             <div className="flex flex-col space-y-1.5">
                                 <Label htmlFor="fastingBloodSugar">
                                     Fasting Blood Sugar
                                 </Label>
-                                <Controller
-                                    name="fastingbs"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Input
-                                            placeholder="Fasting blood sugar"
-                                            {...field}
-                                        />
-                                    )}
+                                <Input
+                                    id="fastingBloodSugar"
+                                    placeholder="Fasting Blood Sugar"
+                                    value={fastingbs}
+                                    onChange={(e) =>
+                                        setFastingbs(e.target.value)
+                                    }
                                 />
                             </div>
-                            {/* Max HR Input */}
+
+                            {/* Max Heart Rate Input */}
                             <div className="flex flex-col space-y-1.5">
-                                <Label htmlFor="maxHR">Max Heart Rate</Label>
-                                <Controller
-                                    name="maxhr"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Input
-                                            placeholder="Maximum heart rate"
-                                            {...field}
-                                        />
-                                    )}
+                                <Label htmlFor="maxHeartRate">
+                                    Max Heart Rate
+                                </Label>
+                                <Input
+                                    id="maxHeartRate"
+                                    placeholder="Max Heart Rate"
+                                    value={maxhr}
+                                    onChange={(e) => setMaxhr(e.target.value)}
                                 />
                             </div>
+
                             {/* Exercise Angina Select */}
                             <div className="flex flex-col space-y-1.5">
                                 <Label htmlFor="exerciseAngina">
-                                    Exercise Induced Angina
+                                    Exercise Angina
                                 </Label>
-                                <Controller
-                                    name="exerciseangina"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Select
-                                            value={field.value}
-                                            onValueChange={field.onChange}
-                                        >
-                                            <SelectTrigger id="exerciseAngina">
-                                                <SelectValue placeholder="Select" />
-                                            </SelectTrigger>
-                                            <SelectContent position="popper">
-                                                <SelectItem value="1">
-                                                    Yes
-                                                </SelectItem>
-                                                <SelectItem value="0">
-                                                    No
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    )}
-                                />
+                                <Select
+                                    value={exerciseangina}
+                                    onValueChange={setExerciseAngina}
+                                >
+                                    <SelectTrigger id="exerciseAngina">
+                                        <SelectValue placeholder="Select" />
+                                    </SelectTrigger>
+                                    <SelectContent position="popper">
+                                        <SelectItem value="1">Yes</SelectItem>
+                                        <SelectItem value="0">No</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
+
                             {/* Old Peak Input */}
                             <div className="flex flex-col space-y-1.5">
                                 <Label htmlFor="oldPeak">Old Peak</Label>
-                                <Controller
-                                    name="oldpeak"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Input
-                                            placeholder="Old Peak"
-                                            {...field}
-                                        />
-                                    )}
+                                <Input
+                                    id="oldPeak"
+                                    placeholder="Old Peak"
+                                    value={oldpeak}
+                                    onChange={(e) => setOldpeak(e.target.value)}
                                 />
                             </div>
 
                             {/* ST Slope Select */}
                             <div className="flex flex-col space-y-1.5">
                                 <Label htmlFor="stSlope">ST Slope</Label>
-                                <Controller
-                                    name="st_slope"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Select
-                                            value={field.value}
-                                            onValueChange={field.onChange}
-                                        >
-                                            <SelectTrigger id="stSlope">
-                                                <SelectValue placeholder="Select" />
-                                            </SelectTrigger>
-                                            <SelectContent position="popper">
-                                                <SelectItem value="1">
-                                                    Flat
-                                                </SelectItem>
-                                                <SelectItem value="2">
-                                                    Up
-                                                </SelectItem>
-                                                <SelectItem value="0">
-                                                    Down
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    )}
-                                />
+                                <Select
+                                    value={st_slope}
+                                    onValueChange={setStSlope}
+                                >
+                                    <SelectTrigger id="stSlope">
+                                        <SelectValue placeholder="Select" />
+                                    </SelectTrigger>
+                                    <SelectContent position="popper">
+                                        <SelectItem value="1">Flat</SelectItem>
+                                        <SelectItem value="2">Up</SelectItem>
+                                        <SelectItem value="0">Down</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
                     </form>
+                    {responseData && (
+                        <div className="flex justify-center items-center mt-4 p-4 text-lg rounded-2xl bg-slate-300">
+                            <p className="font-medium tracking-wide">
+                                {jsondata}
+                            </p>
+                        </div>
+                    )}
                 </CardContent>
 
-                <CardFooter className="flex justify-between">
-                    {/* Reset Button */}
+                <CardFooter className="flex flex-col justify-between">
+                    <p className="text-red-700 font-medium text-sm pb-2">
+                        *All fields must be filled.
+                    </p>
                     <Button
-                        className="bg-red-400 hover:bg-red-800"
-                        onClick={resetForm}
-                    >
-                        Reset
-                    </Button>
-
-                    {/* Predict Button */}
-                    <Button
-                        type="submit" // This ensures form submission is triggered
-                        className="bg-black text-white"
-                        variant="outline"
-                        onClick={handleSubmit(onSubmit)}
+                        onClick={handleSubmit}
+                        type="submit"
+                        className="h-10 text-lg bg-black text-white"
                     >
                         Predict with AI
                     </Button>
