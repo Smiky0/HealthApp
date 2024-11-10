@@ -53,10 +53,10 @@ export default function UserInformation({
             setWeight(initialData.weight);
         }
     }, [initialData]);
-    const userId = auth.currentUser?.uid;
+    const userid = auth.currentUser?.uid;
 
     const userData = {
-        userId,
+        userid,
         name,
         gender,
         age,

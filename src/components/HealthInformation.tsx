@@ -52,10 +52,10 @@ export default function HealthInformation({
             setAlcohol(initialData.alcohol);
         }
     }, [initialData]);
-    const userId = auth.currentUser?.uid;
+    const userid = auth.currentUser?.uid;
 
     const healthData = {
-        userId,
+        userid,
         bloodpressure,
         allergy,
         smoking,
