@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "./ui/card";
 import PuffLoader from "react-spinners/PuffLoader";
 import UserInformation from "./UserInformation";
 import { auth } from "./firebase";
@@ -15,6 +21,10 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ onLoadComplete }) => {
     const [height, setHeight] = useState<string>("");
     const [weight, setWeight] = useState<string>("");
     const [bmi, setBmi] = useState<string>("");
+    const [bloodps, setBloodPS] = useState("");
+    const [allergy, setAllergy] = useState<string>("");
+    const [smoking, setSmoking] = useState<string>("");
+    const [alcohol, setAlcohol] = useState<string>("");
     const [userExists, setUserExists] = useState<boolean>(true);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -30,7 +40,6 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ onLoadComplete }) => {
                     method: "GET",
                 }
             );
-
             if (!response.ok) {
                 throw new Error("Failed to fetch data");
             } else if (response.status === 204) {
@@ -50,6 +59,10 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ onLoadComplete }) => {
             setHeight(data.height || "");
             setWeight(data.weight || "");
             setBmi(data.bmi || "");
+            setBloodPS(data.bloodpressure || "");
+            setAllergy(data.allergy || "");
+            setSmoking(data.smoking || "");
+            setAlcohol(data.alcohol || "");
         } catch (error) {
             setLoading(false);
             setError((error as Error).message);
@@ -70,51 +83,102 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ onLoadComplete }) => {
     }
 
     return (
-        <div className="flex flex-col w-full sm:w-3/4 gap-3 bg-white rounded-3xl">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Personal Details:</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    {error ? (
-                        <p className="text-md text-medium text-red-700">
-                            Error loading patient report: {error}
-                        </p>
-                    ) : (
-                        <>
-                            <p className="text-black text-lg capitalize px-1">
-                                <span className="font-medium">Full Name:</span>
-                                {" " + name}
+        <>
+            <div className="flex flex-col w-full sm:w-3/4 gap-3 bg-white rounded-3xl">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Personal Details:</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        {error ? (
+                            <p className="text-md text-medium text-red-700">
+                                Error loading patient report: {error}
                             </p>
-                            <p className="text-black text-lg capitalize px-1">
-                                <span className="font-medium">Gender:</span>
-                                {" " + gender ? " Male" : " Female"}
-                            </p>
-                            <p className="text-black text-lg capitalize px-1">
-                                <span className="font-medium">Age:</span>
-                                {" " + age}
-                            </p>
-                            <p className="text-black text-lg  px-1">
-                                <span className="font-medium">
-                                    Height (in cm):
-                                </span>
-                                {" " + height}
-                            </p>
-                            <p className="text-black text-lg  px-1">
-                                <span className="font-medium">
-                                    Weight (in kg):
-                                </span>
-                                {" " + weight}
-                            </p>
-                            <p className="text-black text-lg capitalize px-1">
-                                <span className="font-medium">BMI:</span>
-                                {" " + bmi}
-                            </p>
-                        </>
-                    )}
-                </CardContent>
-            </Card>
-        </div>
+                        ) : (
+                            <>
+                                <p className="text-black text-lg capitalize px-1">
+                                    <span className="font-medium">
+                                        Full Name:
+                                    </span>
+                                    {" " + name}
+                                </p>
+                                <p className="text-black text-lg capitalize px-1">
+                                    <span className="font-medium">Gender:</span>
+                                    {" " +
+                                        (gender === "1" ? " Male" : " Female")}
+                                </p>
+                                <p className="text-black text-lg capitalize px-1">
+                                    <span className="font-medium">Age:</span>
+                                    {" " + age}
+                                </p>
+                                <p className="text-black text-lg  px-1">
+                                    <span className="font-medium">
+                                        Height (in cm):
+                                    </span>
+                                    {" " + height}
+                                </p>
+                                <p className="text-black text-lg  px-1">
+                                    <span className="font-medium">
+                                        Weight (in kg):
+                                    </span>
+                                    {" " + weight}
+                                </p>
+                                <p className="text-black text-lg capitalize px-1">
+                                    <span className="font-medium">BMI:</span>
+                                    {" " + bmi}
+                                </p>
+                            </>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
+            <div className="flex flex-col w-full sm:w-3/4 gap-3 bg-white rounded-3xl mb-14">
+                <Card className="w-full">
+                    <CardHeader>
+                        <CardTitle>Health Report:</CardTitle>
+                        <CardDescription className="text-black/70">
+                            As per data provided by user...
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid lg:grid-cols-2 capitalize gap-3">
+                            {error ? (
+                                <p className="text-md text-medium text-red-700">
+                                    Error loading patient report: {error}
+                                </p>
+                            ) : (
+                                <>
+                                    <p className="text-black text-lg capitalize px-1">
+                                        <span className="font-medium">
+                                            Blood Pressure:
+                                        </span>{" "}
+                                        {" " + bloodps}
+                                    </p>
+                                    <p className="text-black text-lg capitalize px-1">
+                                        <span className="font-medium">
+                                            Allergy:
+                                        </span>{" "}
+                                        {" " + (allergy === "1" ? "Yes" : "No")}
+                                    </p>
+                                    <p className="text-black text-lg capitalize px-1">
+                                        <span className="font-medium">
+                                            Smoking History:
+                                        </span>{" "}
+                                        {" " + (smoking === "1" ? "Yes" : "No")}
+                                    </p>
+                                    <p className="text-black text-lg capitalize px-1">
+                                        <span className="font-medium">
+                                            Alcohol Consumption:
+                                        </span>{" "}
+                                        {" " + (alcohol === "1" ? "Yes" : "No")}
+                                    </p>
+                                </>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        </>
     );
 };
 

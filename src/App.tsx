@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Accordian from "./components/Accordian";
 import Navbar from "./components/Navbar";
 import PatientDetails from "./components/PatientDetails";
-import PatientReport from "./components/PatientReport";
+// import PatientReport from "./components/PatientReport";
 import { Button } from "./components/ui/button";
 import { auth } from "./components/firebase";
 import {
@@ -22,7 +22,7 @@ function App() {
 
     // Loading states for PatientDetails and PatientReport
     const [detailsLoaded, setDetailsLoaded] = useState(false);
-    const [reportLoaded, setReportLoaded] = useState(false);
+    // const [reportLoaded, setReportLoaded] = useState(false);
 
     // Check if a user is logged in and update `user` state
     useEffect(() => {
@@ -51,7 +51,7 @@ function App() {
         }
     };
 
-    const showPredictButton = reportLoaded && detailsLoaded;
+    const showPredictButton = detailsLoaded;
     const handleButtonClick = () => {
         setButtonText(
             buttonText === "Predict with AI ✨"
@@ -86,11 +86,11 @@ function App() {
                                                 setDetailsLoaded(true)
                                             }
                                         />
-                                        <PatientReport
+                                        {/* <PatientReport
                                             onLoadComplete={() =>
                                                 setReportLoaded(true)
                                             }
-                                        />
+                                        /> */}
 
                                         {/* predict with ai button */}
                                         <Link

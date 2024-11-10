@@ -25,6 +25,10 @@ interface UserDetails {
     gender: string;
     height: string;
     weight: string;
+    bloodpressure: string;
+    allergy: string;
+    smoking: string;
+    alcohol: string;
 }
 
 export default function UserInformation({
@@ -40,8 +44,16 @@ export default function UserInformation({
     const [height, setHeight] = useState<string>(initialData?.height || "");
     const [weight, setWeight] = useState<string>(initialData?.weight || "");
 
+    const [bloodpressure, setBloodPressure] = useState<string>(
+        initialData?.bloodpressure || ""
+    );
+    const [allergy, setAllergy] = useState<string>(initialData?.allergy || "");
+    const [smoking, setSmoking] = useState<string>(initialData?.smoking || "");
+    const [alcohol, setAlcohol] = useState<string>(initialData?.alcohol || "");
+
     // check if fields are empty
     const [formFilled, setFormFilled] = useState(false);
+    const [formSubmitted, setFormSubmitted] = useState(false);
 
     // set initial data if recieved
     useEffect(() => {
@@ -51,6 +63,10 @@ export default function UserInformation({
             setGender(initialData.gender);
             setHeight(initialData.height);
             setWeight(initialData.weight);
+            setBloodPressure(initialData.bloodpressure);
+            setAllergy(initialData.allergy);
+            setSmoking(initialData.smoking);
+            setAlcohol(initialData.alcohol);
         }
     }, [initialData]);
     const userid = auth.currentUser?.uid;
@@ -62,13 +78,27 @@ export default function UserInformation({
         age,
         height,
         weight,
+        bloodpressure,
+        allergy,
+        smoking,
+        alcohol,
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         // check if all fields are fileld
-        if (name && gender && age && height && weight) {
+        if (
+            name &&
+            gender &&
+            age &&
+            height &&
+            weight &&
+            bloodpressure &&
+            allergy &&
+            smoking &&
+            alcohol
+        ) {
             setFormFilled(true);
         } else {
             setFormFilled(false);
@@ -88,7 +118,7 @@ export default function UserInformation({
                     }
                 );
                 // console.log(JSON.stringify(userData));
-
+                setFormSubmitted(true);
                 if (!response.ok) {
                     throw new Error("Failed to submit data");
                 }
@@ -100,86 +130,198 @@ export default function UserInformation({
     };
 
     return (
-        <div className="flex flex-col w-full sm:w-1/2 gap-3 bg-white rounded-3xl">
-            <Card className="w-full">
-                <CardHeader>
-                    <CardTitle>Personal Details:</CardTitle>
-                    <CardDescription>
-                        Please enter correct details
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <form onSubmit={handleSubmit}>
-                        <div className="grid w-full items-center gap-4">
-                            <div className="flex flex-col space-y-1.5">
-                                <Label htmlFor="name">Full Name</Label>
-                                <Input
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    id="name"
-                                    placeholder="Your Full Name"
-                                />
+        <>
+            <div className="flex flex-col w-full sm:w-1/2 gap-3 bg-white rounded-3xl">
+                <Card className="w-full">
+                    <CardHeader>
+                        <CardTitle>Personal Details:</CardTitle>
+                        <CardDescription>
+                            Please enter correct details
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <form onSubmit={handleSubmit}>
+                            <div className="grid w-full items-center gap-4">
+                                <div className="flex flex-col space-y-1.5">
+                                    <Label htmlFor="name">Full Name</Label>
+                                    <Input
+                                        value={name}
+                                        onChange={(e) =>
+                                            setName(e.target.value)
+                                        }
+                                        id="name"
+                                        placeholder="Your Full Name"
+                                    />
+                                </div>
+                                <div className="flex flex-col space-y-1.5">
+                                    <Label htmlFor="framework">Gender</Label>
+                                    <Select
+                                        value={gender}
+                                        onValueChange={setGender}
+                                    >
+                                        <SelectTrigger id="framework">
+                                            <SelectValue placeholder="Select Gender" />
+                                        </SelectTrigger>
+                                        <SelectContent position="popper">
+                                            <SelectItem value="1">
+                                                Male
+                                            </SelectItem>
+                                            <SelectItem value="0">
+                                                Female
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="flex flex-col space-y-1.5">
+                                    <Label htmlFor="name">Your Age</Label>
+                                    <Input
+                                        id="name"
+                                        placeholder="Present Age"
+                                        value={age}
+                                        onChange={(e) => setAge(e.target.value)}
+                                    />
+                                </div>
+                                <div className="flex flex-col space-y-1.5">
+                                    <Label htmlFor="name">Height (in cm)</Label>
+                                    <Input
+                                        id="name"
+                                        placeholder="Present Height"
+                                        value={height}
+                                        onChange={(e) =>
+                                            setHeight(e.target.value)
+                                        }
+                                    />
+                                </div>
+                                <div className="flex flex-col space-y-1.5">
+                                    <Label htmlFor="name">Weight (in kg)</Label>
+                                    <Input
+                                        id="name"
+                                        placeholder="Present Weight"
+                                        value={weight}
+                                        onChange={(e) =>
+                                            setWeight(e.target.value)
+                                        }
+                                    />
+                                </div>
                             </div>
-                            <div className="flex flex-col space-y-1.5">
-                                <Label htmlFor="framework">Gender</Label>
-                                <Select
-                                    value={gender}
-                                    onValueChange={setGender}
-                                >
-                                    <SelectTrigger id="framework">
-                                        <SelectValue placeholder="Select Gender" />
-                                    </SelectTrigger>
-                                    <SelectContent position="popper">
-                                        <SelectItem value="1">Male</SelectItem>
-                                        <SelectItem value="0">
-                                            Female
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
+                        </form>
+                    </CardContent>
+                    <CardFooter className="flex flex-col justify-center">
+                        <p className="text-red-700 font-medium text-sm pb-2">
+                            *All fields must to be filled.
+                        </p>
+                        {/* <Button
+                            onClick={handleSubmit}
+                            type="submit"
+                            className="h-10 text-lg"
+                        >
+                            Submit
+                        </Button> */}
+                    </CardFooter>
+                </Card>
+            </div>
+            <div className="flex flex-col w-full sm:w-1/2 gap-3 bg-white rounded-3xl mb-14">
+                <Card className="w-full">
+                    <CardHeader>
+                        <CardTitle>Health Report:</CardTitle>
+                        <CardDescription>
+                            Please enter correct details
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <form onSubmit={handleSubmit}>
+                            <div className="grid w-full items-center gap-4">
+                                <div className="flex flex-col space-y-1.5">
+                                    <Label htmlFor="name">Blood Pressure</Label>
+                                    <Input
+                                        value={bloodpressure}
+                                        onChange={(e) =>
+                                            setBloodPressure(e.target.value)
+                                        }
+                                        id="name"
+                                        placeholder="Your Blood Pressure"
+                                    />
+                                </div>
+                                <div className="flex flex-col space-y-1.5">
+                                    <Label htmlFor="framework">Allergy</Label>
+                                    <Select
+                                        value={allergy}
+                                        onValueChange={setAllergy}
+                                    >
+                                        <SelectTrigger id="framework">
+                                            <SelectValue placeholder="Select yes/no" />
+                                        </SelectTrigger>
+                                        <SelectContent position="popper">
+                                            <SelectItem value="1">
+                                                Yes
+                                            </SelectItem>
+                                            <SelectItem value="0">
+                                                No
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="flex flex-col space-y-1.5">
+                                    <Label htmlFor="framework">Smoking</Label>
+                                    <Select
+                                        value={smoking}
+                                        onValueChange={setSmoking}
+                                    >
+                                        <SelectTrigger id="framework">
+                                            <SelectValue placeholder="Select yes/no" />
+                                        </SelectTrigger>
+                                        <SelectContent position="popper">
+                                            <SelectItem value="1">
+                                                Yes
+                                            </SelectItem>
+                                            <SelectItem value="0">
+                                                No
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="flex flex-col space-y-1.5">
+                                    <Label htmlFor="framework">
+                                        Alcohol Comsumption
+                                    </Label>
+                                    <Select
+                                        value={alcohol}
+                                        onValueChange={setAlcohol}
+                                    >
+                                        <SelectTrigger id="framework">
+                                            <SelectValue placeholder="Select yes/no" />
+                                        </SelectTrigger>
+                                        <SelectContent position="popper">
+                                            <SelectItem value="1">
+                                                Yes
+                                            </SelectItem>
+                                            <SelectItem value="0">
+                                                No
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                             </div>
-                            <div className="flex flex-col space-y-1.5">
-                                <Label htmlFor="name">Your Age</Label>
-                                <Input
-                                    id="name"
-                                    placeholder="Present Age"
-                                    value={age}
-                                    onChange={(e) => setAge(e.target.value)}
-                                />
+                        </form>
+                        {formSubmitted && (
+                            <div className="flex justify-center items-center mt-4 p-4 text-sm rounded-2xl bg-slate-300">
+                                <p className="font-medium tracking-wide">
+                                    Saved data! Refresh to view..
+                                </p>
                             </div>
-                            <div className="flex flex-col space-y-1.5">
-                                <Label htmlFor="name">Height (in cm)</Label>
-                                <Input
-                                    id="name"
-                                    placeholder="Present Height"
-                                    value={height}
-                                    onChange={(e) => setHeight(e.target.value)}
-                                />
-                            </div>
-                            <div className="flex flex-col space-y-1.5">
-                                <Label htmlFor="name">Weight (in kg)</Label>
-                                <Input
-                                    id="name"
-                                    placeholder="Present Weight"
-                                    value={weight}
-                                    onChange={(e) => setWeight(e.target.value)}
-                                />
-                            </div>
-                        </div>
-                    </form>
-                </CardContent>
-                <CardFooter className="flex flex-col justify-center">
-                    <p className="text-red-700 font-medium text-sm pb-2">
-                        *All fields must to be filled.
-                    </p>
-                    <Button
-                        onClick={handleSubmit}
-                        type="submit"
-                        className="h-10 text-lg"
-                    >
-                        Submit
-                    </Button>
-                </CardFooter>
-            </Card>
-        </div>
+                        )}
+                    </CardContent>
+                    <CardFooter className="flex justify-center">
+                        <Button
+                            onClick={handleSubmit}
+                            type="submit"
+                            className="h-10 text-lg"
+                        >
+                            Submit
+                        </Button>
+                    </CardFooter>
+                </Card>
+            </div>
+        </>
     );
 }
