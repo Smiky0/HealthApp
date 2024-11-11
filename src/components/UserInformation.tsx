@@ -311,7 +311,10 @@ export default function UserInformation({
                             </div>
                         )}
                     </CardContent>
-                    <CardFooter className="flex justify-center">
+                    <CardFooter className="flex flex-col justify-center">
+                        <p className="text-red-700 font-medium text-sm pb-2">
+                            *All fields must to be filled.
+                        </p>
                         <Button
                             onClick={handleSubmit}
                             type="submit"

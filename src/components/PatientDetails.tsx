@@ -17,14 +17,14 @@ interface PatientDetailsProps {
 const PatientDetails: React.FC<PatientDetailsProps> = ({ onLoadComplete }) => {
     const [name, setName] = useState<string>("");
     const [age, setAge] = useState<string>("");
-    const [gender, setGender] = useState<string>("");
+    const [gender, setGender] = useState<number>();
     const [height, setHeight] = useState<string>("");
     const [weight, setWeight] = useState<string>("");
     const [bmi, setBmi] = useState<string>("");
     const [bloodps, setBloodPS] = useState("");
-    const [allergy, setAllergy] = useState<string>("");
-    const [smoking, setSmoking] = useState<string>("");
-    const [alcohol, setAlcohol] = useState<string>("");
+    const [allergy, setAllergy] = useState<number>();
+    const [smoking, setSmoking] = useState<number>();
+    const [alcohol, setAlcohol] = useState<number>();
     const [userExists, setUserExists] = useState<boolean>(true);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -104,8 +104,7 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ onLoadComplete }) => {
                                 </p>
                                 <p className="text-black text-lg capitalize px-1">
                                     <span className="font-medium">Gender:</span>
-                                    {" " +
-                                        (gender === "1" ? " Male" : " Female")}
+                                    {" " + (gender === 1 ? " Male" : " Female")}
                                 </p>
                                 <p className="text-black text-lg capitalize px-1">
                                     <span className="font-medium">Age:</span>
@@ -158,19 +157,19 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ onLoadComplete }) => {
                                         <span className="font-medium">
                                             Allergy:
                                         </span>{" "}
-                                        {" " + (allergy === "1" ? "Yes" : "No")}
+                                        {" " + (allergy === 1 ? "Yes" : "No")}
                                     </p>
                                     <p className="text-black text-lg capitalize px-1">
                                         <span className="font-medium">
                                             Smoking History:
                                         </span>{" "}
-                                        {" " + (smoking === "1" ? "Yes" : "No")}
+                                        {" " + (smoking === 1 ? "Yes" : "No")}
                                     </p>
                                     <p className="text-black text-lg capitalize px-1">
                                         <span className="font-medium">
                                             Alcohol Consumption:
                                         </span>{" "}
-                                        {" " + (alcohol === "1" ? "Yes" : "No")}
+                                        {" " + (alcohol === 1 ? "Yes" : "No")}
                                     </p>
                                 </>
                             )}
