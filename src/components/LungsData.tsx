@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Loader2 } from "lucide-react";
 
 export default function LungsData() {
     const [file, setFile] = useState<File | null>(null);
@@ -18,6 +19,8 @@ export default function LungsData() {
 
     const [responseData, setResponseData] = useState<boolean>(false);
     const [lungsData, setLungsData] = useState<any>(null);
+
+    const [responseLoading, setResponseLoading] = useState(false);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = event.target.files?.[0];
@@ -39,26 +42,34 @@ export default function LungsData() {
 
     const handlePredict = async () => {
         if (base64) {
-            const response = await fetch(
-                "https://health-track-app-cm4e.onrender.com/model/lungimage",
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ img: base64 }),
-                }
-            );
-            const jsonresponse = await response.json();
-            console.log(jsonresponse);
-            setResponseData(true);
-            console.log(jsonresponse);
+            try {
+                setResponseLoading(true);
+                const response = await fetch(
+                    import.meta.env.VITE_BACKEND_API_URL + "model/lungimage",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ img: base64 }),
+                    }
+                );
 
-            if (
-                jsonresponse["tuber"] === "normal" &&
-                jsonresponse["covid"] === "normal"
-            ) {
-                setLungsData("You seem healthy");
-            } else {
-                setLungsData("Need to get checked");
+                const jsonresponse = await response.json();
+                // console.log(jsonresponse);
+                setResponseData(true);
+                // console.log(jsonresponse);
+
+                if (
+                    jsonresponse["tuber"] === "normal" &&
+                    jsonresponse["covid"] === "normal"
+                ) {
+                    setLungsData("You seem healthy");
+                } else {
+                    setLungsData("Need to get checked");
+                }
+            } catch (error) {
+                console.error("Error submitting data:", error);
+            } finally {
+                setResponseLoading(false);
             }
         } else {
             console.log("No file selected or processing failed.");
@@ -107,13 +118,25 @@ export default function LungsData() {
                     >
                         Reset
                     </Button>
-                    <Button
-                        onClick={handlePredict}
-                        className="bg-black text-white"
-                        variant="outline"
-                    >
-                        Predict with AI
-                    </Button>
+                    {responseLoading ? (
+                        <Button
+                            disabled
+                            onClick={handlePredict}
+                            className="bg-black text-white"
+                            variant="outline"
+                        >
+                            <Loader2 className="animate-spin" />
+                            Predict with AI
+                        </Button>
+                    ) : (
+                        <Button
+                            onClick={handlePredict}
+                            className="bg-black text-white"
+                            variant="outline"
+                        >
+                            Predict with AI
+                        </Button>
+                    )}
                 </CardFooter>
             </Card>
         </div>

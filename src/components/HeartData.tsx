@@ -18,6 +18,7 @@ import {
 import { Input } from "./ui/input";
 import { useState } from "react";
 import { auth } from "./firebase";
+import { Loader2 } from "lucide-react";
 
 export default function HeartData() {
     const [chestpaintype, setChestPainType] = useState("");
@@ -30,7 +31,7 @@ export default function HeartData() {
     const [responseData, setResponseData] = useState<any>(null);
     const [jsondata, setJsondata] = useState<any>(null);
 
-    const [formFilled, setFormFilled] = useState(false);
+    const [responseLoading, setResponseLoading] = useState(false);
 
     const userid = auth.currentUser?.uid;
 
@@ -49,50 +50,51 @@ export default function HeartData() {
         e.preventDefault();
 
         // Check if all fields are filled
-        if (
+        const isFormComplete =
             chestpaintype &&
             cholesterol &&
             fastingbs &&
             maxhr &&
             exerciseangina &&
             oldpeak &&
-            st_slope
-        ) {
-            setFormFilled(true);
-        } else {
-            setFormFilled(false);
+            st_slope;
+
+        if (!isFormComplete) {
+            // setFormFilled(false);
             return;
         }
-        if (formFilled) {
-            try {
-                const response = await fetch(
-                    "https://health-track-app-cm4e.onrender.com/model/heartfailure",
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify(userData),
-                    }
-                );
 
-                if (!response.ok) {
-                    throw new Error("Failed to submit data");
+        try {
+            setResponseLoading(true);
+            const response = await fetch(
+                import.meta.env.VITE_BACKEND_API_URL + "model/heartfailure",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(userData),
                 }
-                // Handle successful form submission
-                console.log("Data submitted successfully!");
-                // console.log(response.json());
+            );
 
-                const jsonresponse = await response.json();
-                setResponseData(true);
-                if (jsonresponse["heart"] === "Yes") {
-                    setJsondata("You need to get checked");
-                } else if (jsonresponse["heart"] === "No") {
-                    setJsondata("You seem healthy");
-                }
-            } catch (error) {
-                console.error("Error submitting data:", error);
+            if (!response.ok) {
+                throw new Error("Failed to submit data");
             }
+            // Handle successful form submission
+            console.log("Data submitted successfully!");
+            // console.log(response.json());
+
+            const jsonresponse = await response.json();
+            setResponseData(true);
+            if (jsonresponse["heart"] === "Yes") {
+                setJsondata("You need to get checked");
+            } else if (jsonresponse["heart"] === "No") {
+                setJsondata("You seem healthy");
+            }
+        } catch (error) {
+            console.error("Error submitting data:", error);
+        } finally {
+            setResponseLoading(false);
         }
     };
 
@@ -232,13 +234,25 @@ export default function HeartData() {
                     <p className="text-red-700 font-medium text-sm pb-2">
                         *All fields must be filled.
                     </p>
-                    <Button
-                        onClick={handleSubmit}
-                        type="submit"
-                        className="h-10 text-lg bg-black text-white"
-                    >
-                        Predict with AI
-                    </Button>
+                    {responseLoading ? (
+                        <Button
+                            disabled
+                            type="submit"
+                            className="h-10 text-lg"
+                            onClick={handleSubmit}
+                        >
+                            <Loader2 className="animate-spin" />
+                            Predict with AI
+                        </Button>
+                    ) : (
+                        <Button
+                            type="submit"
+                            className="h-10 text-lg"
+                            onClick={handleSubmit}
+                        >
+                            Predict with AI
+                        </Button>
+                    )}
                 </CardFooter>
             </Card>
         </div>

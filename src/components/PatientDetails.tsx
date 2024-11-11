@@ -33,9 +33,7 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ onLoadComplete }) => {
     const fetchPatientDetails = async () => {
         try {
             const response = await fetch(
-                "https://health-track-app-cm4e.onrender.com/getuserdata/" +
-                    userId,
-                // "https://run.mocky.io/v3/ec48f3ca-c6d0-47dd-bb45-a3f9759e794d",
+                import.meta.env.VITE_BACKEND_API_URL + "getuserdata/" + userId,
                 {
                     method: "GET",
                 }

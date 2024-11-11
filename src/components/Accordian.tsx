@@ -9,6 +9,7 @@ import LungsData from "./LungsData";
 import HeartData from "./HeartData";
 import BrainData from "./BrainData";
 import LungCancerData from "./LungCancerData";
+import HandwritingData from "./HandwritingData";
 
 export default function Accordian() {
     return (
@@ -60,6 +61,15 @@ export default function Accordian() {
                 <AccordionTrigger>Lung Cancer Prediction</AccordionTrigger>
                 <AccordionContent className="flex justify-center pb-0 sm:pb-10">
                     <LungCancerData />
+                </AccordionContent>
+            </AccordionItem>
+            <AccordionItem
+                value="item-6"
+                className="bg-gradient-to-r from-purple-200  to-sky-100 rounded-3xl"
+            >
+                <AccordionTrigger>Handwriting Prediction</AccordionTrigger>
+                <AccordionContent className="flex justify-center pb-0 sm:pb-10">
+                    <HandwritingData />
                 </AccordionContent>
             </AccordionItem>
         </Accordion>

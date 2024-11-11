@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 
-export default function BrainData() {
+export default function HandwritingData() {
     const [file, setFile] = useState<File | null>(null);
     const [base64, setBase64] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -45,7 +45,7 @@ export default function BrainData() {
             try {
                 setResponseLoading(true);
                 const response = await fetch(
-                    import.meta.env.VITE_BACKEND_API_URL + "model/brain",
+                    import.meta.env.VITE_BACKEND_API_URL + "model/handwriting",
                     {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
@@ -56,7 +56,7 @@ export default function BrainData() {
                 const jsonresponse = await response.json();
                 setResponseData(true);
                 // console.log(jsonresponse);
-                setJsondata(jsonresponse["brain"]);
+                setJsondata(jsonresponse["handwriting"]);
             } catch (error) {
                 console.error("Error submitting data:", error);
             } finally {
@@ -78,13 +78,15 @@ export default function BrainData() {
         <div className="flex flex-col w-full sm:w-3/4 gap-3 bg-white rounded-3xl">
             <Card className="w-full">
                 <CardHeader>
-                    <CardTitle>Analyze Brain Tumor</CardTitle>
+                    <CardTitle>Handwriting Prediction</CardTitle>
                     <CardDescription className="text-black/70">
                         Predicted by our new AI model✨✨
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Label htmlFor="picture">Upload Brain MRI Photo</Label>
+                    <Label htmlFor="picture">
+                        Upload Your Handwriting Photo
+                    </Label>
                     <div className="flex w-full max-w-sm items-center gap-1.5">
                         <Input
                             ref={fileInputRef}
@@ -93,10 +95,10 @@ export default function BrainData() {
                             type="file"
                         />
                     </div>
-                    {responseData && (
-                        <div className="flex justify-center items-center mt-4 p-4 text-lg rounded-2xl bg-slate-300">
-                            <p className="font-medium tracking-wide capitalize">
-                                {"Chances of  " + jsondata}
+                    {responseData && jsondata && (
+                        <div className="flex items-center mt-4 p-4 text-md rounded-2xl bg-slate-300">
+                            <p className="font-normal tracking-wide text-pretty">
+                                {jsondata}
                             </p>
                         </div>
                     )}

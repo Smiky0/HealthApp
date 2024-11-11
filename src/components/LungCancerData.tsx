@@ -18,6 +18,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { auth } from "./firebase";
+import { Loader2 } from "lucide-react";
 
 export default function LungCancerData() {
     const [yellowFingers, setYellowFingers] = useState<string>("");
@@ -34,8 +35,8 @@ export default function LungCancerData() {
     const [responseData, setResponseData] = useState<any>(null);
     const [jsondata, setJsondata] = useState<any>(null);
 
-    // Track form validation state
-    const [formFilled, setFormFilled] = useState(false);
+    // data fetching state
+    const [responseLoading, setResponseLoading] = useState(false);
 
     const userId = auth.currentUser?.uid;
 
@@ -56,7 +57,7 @@ export default function LungCancerData() {
         e.preventDefault();
 
         // Check if all fields are filled
-        if (
+        const isFormComplete =
             yellowFingers &&
             anxiety &&
             chronicDisease &&
@@ -65,51 +66,51 @@ export default function LungCancerData() {
             coughing &&
             shortnessOfBreath &&
             swallowingDifficulty &&
-            chestPain
-        ) {
-            setFormFilled(true);
-        } else {
-            setFormFilled(false);
+            chestPain;
+
+        if (!isFormComplete) {
+            // setFormFilled(false);
             return;
         }
 
-        if (formFilled) {
-            console.log(userData);
-            try {
-                const response = await fetch(
-                    "https://health-track-app-cm4e.onrender.com/model/lung",
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify(userData),
-                    }
-                );
-
-                if (!response.ok) {
-                    throw new Error("Failed to submit data");
+        // console.log(userData);
+        try {
+            setResponseLoading(true);
+            const response = await fetch(
+                import.meta.env.VITE_BACKEND_API_URL + "model/lung",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(userData),
                 }
+            );
 
-                // Handle successful form submission
-                console.log("Data submitted successfully!");
-
-                const jsonresponse = await response.json();
-                setResponseData(true);
-                if (jsonresponse["lung"] === "Yes") {
-                    setJsondata("You need to get checked");
-                } else if (jsonresponse["lung"] === "No") {
-                    setJsondata("You seem healthy");
-                }
-                console.log(jsonresponse);
-            } catch (error) {
-                console.error("Error submitting data:", error);
+            if (!response.ok) {
+                throw new Error("Failed to submit data");
             }
+
+            // Handle successful form submission
+            // console.log("Data submitted successfully!");
+
+            const jsonresponse = await response.json();
+            setResponseData(true);
+            if (jsonresponse["lung"] === "Yes") {
+                setJsondata("You need to get checked");
+            } else if (jsonresponse["lung"] === "No") {
+                setJsondata("You seem healthy");
+            }
+            // console.log(jsonresponse);
+        } catch (error) {
+            console.error("Error submitting data:", error);
+        } finally {
+            setResponseLoading(false);
         }
     };
 
     return (
-        <div className="flex flex-col w-full sm:w-1/2 gap-3 bg-white rounded-3xl">
+        <div className="flex flex-col w-full sm:w-3/4 gap-3 bg-white rounded-3xl">
             <Card className="w-full">
                 <CardHeader>
                     <CardTitle>Lung Cancer Prediction</CardTitle>
@@ -119,7 +120,7 @@ export default function LungCancerData() {
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit}>
-                        <div className="grid w-full items-center gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 w-full items-center gap-6">
                             {/* Yellow Fingers Select */}
                             <div className="flex flex-col space-y-1.5">
                                 <Label htmlFor="yellow_fingers">
@@ -303,13 +304,25 @@ export default function LungCancerData() {
                     <p className="text-red-700 font-medium text-sm pb-2">
                         *All fields must be filled.
                     </p>
-                    <Button
-                        type="submit"
-                        className="h-10 text-lg"
-                        onClick={handleSubmit}
-                    >
-                        Predict with AI
-                    </Button>
+                    {responseLoading ? (
+                        <Button
+                            disabled
+                            type="submit"
+                            className="h-10 text-lg"
+                            onClick={handleSubmit}
+                        >
+                            <Loader2 className="animate-spin" />
+                            Predict with AI
+                        </Button>
+                    ) : (
+                        <Button
+                            type="submit"
+                            className="h-10 text-lg"
+                            onClick={handleSubmit}
+                        >
+                            Predict with AI
+                        </Button>
+                    )}
                 </CardFooter>
             </Card>
         </div>

@@ -23,7 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
+# more files
 .gitignore
-firebase.tsx
-# env file
 .env

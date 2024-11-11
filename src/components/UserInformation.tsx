@@ -18,6 +18,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { auth } from "./firebase";
+import { Loader2 } from "lucide-react";
 
 interface UserDetails {
     name: string;
@@ -52,8 +53,9 @@ export default function UserInformation({
     const [alcohol, setAlcohol] = useState<string>(initialData?.alcohol || "");
 
     // check if fields are empty
-    const [formFilled, setFormFilled] = useState(false);
+    // const [formFilled, setFormFilled] = useState(false);
     const [formSubmitted, setFormSubmitted] = useState(false);
+    const [responseLoading, setResponseLoading] = useState(false);
 
     // set initial data if recieved
     useEffect(() => {
@@ -88,7 +90,7 @@ export default function UserInformation({
         e.preventDefault();
 
         // check if all fields are fileld
-        if (
+        const isFormComplete =
             name &&
             gender &&
             age &&
@@ -97,35 +99,35 @@ export default function UserInformation({
             bloodpressure &&
             allergy &&
             smoking &&
-            alcohol
-        ) {
-            setFormFilled(true);
-        } else {
-            setFormFilled(false);
+            alcohol;
+
+        if (!isFormComplete) {
+            // setFormFilled(false);
             return;
         }
-
-        if (formFilled) {
-            try {
-                const response = await fetch(
-                    "https://health-track-app-cm4e.onrender.com/basic",
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify(userData),
-                    }
-                );
-                // console.log(JSON.stringify(userData));
-                setFormSubmitted(true);
-                if (!response.ok) {
-                    throw new Error("Failed to submit data");
+        // setFormFilled(true);
+        try {
+            setResponseLoading(true);
+            const response = await fetch(
+                import.meta.env.VITE_BACKEND_API_URL + "basic",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(userData),
                 }
-                onSubmit();
-            } catch (error) {
-                console.error("Error submitting data:", error);
+            );
+            // console.log(JSON.stringify(userData));
+            setFormSubmitted(true);
+            if (!response.ok) {
+                throw new Error("Failed to submit data");
             }
+            onSubmit();
+        } catch (error) {
+            console.error("Error submitting data:", error);
+        } finally {
+            setResponseLoading(false);
         }
     };
 
@@ -315,13 +317,25 @@ export default function UserInformation({
                         <p className="text-red-700 font-medium text-sm pb-2">
                             *All fields must to be filled.
                         </p>
-                        <Button
-                            onClick={handleSubmit}
-                            type="submit"
-                            className="h-10 text-lg"
-                        >
-                            Submit
-                        </Button>
+                        {responseLoading ? (
+                            <Button
+                                disabled
+                                onClick={handleSubmit}
+                                type="submit"
+                                className="h-10 text-lg"
+                            >
+                                <Loader2 className="animate-spin" />
+                                Submit
+                            </Button>
+                        ) : (
+                            <Button
+                                onClick={handleSubmit}
+                                type="submit"
+                                className="h-10 text-lg"
+                            >
+                                Submit
+                            </Button>
+                        )}
                     </CardFooter>
                 </Card>
             </div>
