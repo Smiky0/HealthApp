@@ -41,14 +41,12 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ onLoadComplete }) => {
             if (!response.ok) {
                 throw new Error("Failed to fetch data");
             } else if (response.status === 204) {
-                setLoading(false);
                 setUserExists(false);
                 return;
             }
 
             const data = await response.json();
             onLoadComplete();
-            setLoading(false);
 
             // Set individual states with the fetched data
             setName(data.name || "");
@@ -62,14 +60,16 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ onLoadComplete }) => {
             setSmoking(data.smoking || "");
             setAlcohol(data.alcohol || "");
         } catch (error) {
-            setLoading(false);
             setError((error as Error).message);
+        } finally {
+            setLoading(false);
         }
     };
     useEffect(() => {
         fetchPatientDetails();
     }, []);
     const handleSubmit = () => {
+        setUserExists(true);
         fetchPatientDetails();
     };
 
