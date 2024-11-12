@@ -308,8 +308,7 @@ export default function UserInformation({
                         {formSubmitted && (
                             <div className="flex justify-center items-center mt-4 p-4 text-sm rounded-2xl bg-slate-300">
                                 <p className="font-medium tracking-wide">
-                                    Saved data! Refresh page if you don't see
-                                    it..
+                                    Saved data!
                                 </p>
                             </div>
                         )}
