@@ -143,7 +143,7 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ onLoadComplete }) => {
                                         <p className="text-black text-lg px-1">
                                             <span className="font-medium">
                                                 Gender:
-                                            </span>
+                                            </span>{" "}
                                             {userData.gender === "1"
                                                 ? "Male"
                                                 : "Female"}
@@ -197,7 +197,7 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ onLoadComplete }) => {
                                         <p className="text-black text-lg px-1">
                                             <span className="font-medium">
                                                 Allergy:
-                                            </span>
+                                            </span>{" "}
                                             {userData.allergy === "1"
                                                 ? "Yes"
                                                 : "No"}
@@ -205,7 +205,7 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ onLoadComplete }) => {
                                         <p className="text-black text-lg px-1">
                                             <span className="font-medium">
                                                 Smoking History:
-                                            </span>
+                                            </span>{" "}
                                             {userData.smoking === "1"
                                                 ? "Yes"
                                                 : "No"}
@@ -213,7 +213,7 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ onLoadComplete }) => {
                                         <p className="text-black text-lg px-1">
                                             <span className="font-medium">
                                                 Alcohol Consumption:
-                                            </span>
+                                            </span>{" "}
                                             {userData.alcohol === "1"
                                                 ? "Yes"
                                                 : "No"}
