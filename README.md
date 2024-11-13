@@ -10,11 +10,11 @@
 - **Personalized Dashboard**: New users are prompted to provide basic health information to personalize their experience.
 ## Screenshots
 
-![Desktop View](screenshots/ss1.png)
-![Desktop View](screenshots/ss2.png)
-![Desktop View](screenshots/ss3.png)
-![Desktop View](screenshots/ss4.png)
-![Desktop View](screenshots/ss5.png)
+![Desktop View](screenshot/ss1.png)
+![Desktop View](screenshot/ss2.png)
+![Desktop View](screenshot/ss3.png)
+![Desktop View](screenshot/ss4.png)
+![Desktop View](screenshot/ss5.png)
 
 
 ## 🛠 Technologies Used
