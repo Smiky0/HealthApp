@@ -62,10 +62,10 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ onLoadComplete }) => {
             // Populate user data
             setUserData({
                 name: data.name || "",
-                age: data.age || "",
+                age: String(data.age) || "",
                 gender: data.gender != null ? String(data.gender) : "",
-                height: data.height || "",
-                weight: data.weight || "",
+                height: String(data.height) || "",
+                weight: String(data.weight) || "",
                 bloodpressure: data.bloodpressure || "",
                 allergy: data.allergy != null ? String(data.allergy) : "",
                 smoking: data.smoking != null ? String(data.smoking) : "",
