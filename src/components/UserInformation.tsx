@@ -37,7 +37,7 @@ export default function UserInformation({
     initialData,
 }: {
     onSubmit: () => void;
-    initialData?: UserDetails;
+    initialData?: UserDetails | null;
 }) {
     const [name, setName] = useState<string>(initialData?.name || "");
     const [age, setAge] = useState<string>(initialData?.age || "");
@@ -119,10 +119,10 @@ export default function UserInformation({
                 }
             );
             // console.log(JSON.stringify(userData));
-            setFormSubmitted(true);
             if (!response.ok) {
                 throw new Error("Failed to submit data");
             }
+            setFormSubmitted(true);
             onSubmit();
         } catch (error) {
             console.error("Error submitting data:", error);
