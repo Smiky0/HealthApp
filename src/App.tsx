@@ -14,6 +14,7 @@ import {
     signOut,
 } from "firebase/auth";
 import { MailOpen } from "lucide-react";
+import NotFoundPage from "./components/NotFoundPage";
 // import UpdateData from "./components/UpdateData";
 
 function App() {
@@ -86,11 +87,6 @@ function App() {
                                                 setDetailsLoaded(true)
                                             }
                                         />
-                                        {/* <PatientReport
-                                            onLoadComplete={() =>
-                                                setReportLoaded(true)
-                                            }
-                                        /> */}
 
                                         {/* predict with ai button */}
                                         <Link
@@ -136,10 +132,7 @@ function App() {
                                     </>
                                 }
                             />
-                            {/* <Route
-                                path="/update_details"
-                                element={<UpdateData onSubmit={handleSubmit} />}
-                            /> */}
+                            <Route path="*" element={<NotFoundPage />} />
                         </Routes>
                     </>
                 ) : (
